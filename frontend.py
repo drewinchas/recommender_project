@@ -32,6 +32,7 @@ def show_collab_recommendations(movie_title):
 
 # Query screen
 if st.session_state.screen == 'query':
+    st.write("Select one or more options to get a list of movie recommendations. From that list, you can select a favorite movie to get similar recommendations.")
     # Create a form for user input
     with st.form(key='recommender_form'):
         genre = st.selectbox('Select Genre', options=[''] + get_genres())
@@ -79,7 +80,7 @@ if st.session_state.screen == 'recommendations':
 
     with st.container(border=True):
         # Display column headers
-        col1, col2, col3, col4, col5, col6, col7 = st.columns([3,2,1,2,2,2,2])
+        col1, col2, col3, col4, col5, col6, col7 = st.columns([5,2,2,2,2,2,2])
         with col1:
             st.write("Title")
         with col2:
@@ -100,7 +101,7 @@ if st.session_state.screen == 'recommendations':
         if not recommendations.empty:
         
             for index, row in recommendations.iterrows():
-                col1, col2, col3, col4, col5, col6, col7 = st.columns([3,2,1,2,2,2,2])
+                col1, col2, col3, col4, col5, col6, col7 = st.columns([5,2,2,2,2,2,2])
                 with col1:
                     #st.write(row['Title'])
                     if st.button(row['Title'], key=index):
@@ -128,7 +129,7 @@ if st.session_state.screen == 'recommendations':
     
 # Collaborative recommendations screen
 if st.session_state.screen == 'collab_recommendations':
-    st.write("Here are movies similar to your selected favorite: " + st.session_state.favorite_movie)
+    st.write('''Here are movies similar to your selected favorite: **''' + st.session_state.favorite_movie + '''**''')
     
     with st.container(border=True):
         # Display column headers
