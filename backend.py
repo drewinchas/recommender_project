@@ -90,15 +90,24 @@ def get_top_star1():
     top_star1 = star1_counts.head(10).index.tolist()
     return top_star1
 
+# Get runtime blocks
+def get_runtime_blocks():
+    # Get unique runtime blocks
+    unique_runtime_blocks = df['Runtime_Block'].dropna().unique().tolist()
+    # Convert runtime blocks to strings
+    unique_runtime_blocks = [str(int(block)) for block in unique_runtime_blocks]
+    return unique_runtime_blocks
+
 if __name__ == "__main__":
     # Example usage
-    query = 'Action 1980 Steven Spielberg Tom Hanks'
+    query = 'Action 1980 120 Steven Spielberg Tom Hanks'
     recommendations = get_content_recs(query)
-    print(recommendations[['Series_Title', 'Genre', 'Released_Year', 'IMDB_Rating', 'Director', 'Star1']])
+    print(recommendations[['Series_Title', 'Genre', 'Released_Year', 'Runtime_Block', 'IMDB_Rating', 'Director', 'Star1']])
     print(get_genres())
     print(get_decades())   
     print(get_top_directors())
     print(get_top_star1())
+    print(get_runtime_blocks())
 
     # Example usage of collaborative recommendations
     #collab_recommendations = get_collab_recs('The Shawshank Redemption')

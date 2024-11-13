@@ -38,6 +38,7 @@ if st.session_state.screen == 'query':
         decade = st.selectbox('Select Decade', options=[''] + get_decades())
         director = st.selectbox('Select Director', options=[''] + get_top_directors())
         star = st.selectbox('Select Star', options=[''] + get_top_star1())
+        runtime = st.selectbox('Select Runtime Block', options=[''] + get_runtime_blocks())
         
         # Submit button
         submit_button = st.form_submit_button(label='Get Recommendations')
@@ -45,7 +46,7 @@ if st.session_state.screen == 'query':
     # Handle form submission
     if submit_button:
         # Create a query string based on user input
-        query = ' '.join(filter(None, [genre, decade, director, star]))
+        query = ' '.join(filter(None, [genre, decade, runtime, director, star]))
         
         # Get recommendations
         recommendations = get_content_recs(query)
