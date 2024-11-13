@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import re
 
 # Read the CSV file into a DataFrame
 df = pd.read_csv('data/updated_imdb_top_1000.csv')
@@ -14,8 +15,17 @@ df_expanded['Genre'] = df_expanded['Genre'].str.strip()
 # Add a column for the decade of the year the movie was released
 df['Decade'] = (df['Released_Year'] // 10) * 10
 
+# Remove all non-numeric characters from 'Runtime'
+df['Runtime'] = df['Runtime'].apply(lambda x: re.sub(r'\D', '', str(x)))
+
+# Convert 'Runtime' to numeric, setting errors='coerce' to handle any remaining non-numeric values
+df['Runtime'] = pd.to_numeric(df['Runtime'], errors='coerce')
+
 # Add a column for the runtime in blocks of 30 minutes
-df['Runtime_Block'] = (df['tmdb_runtime'] // 30) * 30
+df['Runtime_Block'] = (df['Runtime'] // 30) * 30
+
+# Add a column for the runtime block range
+df['Runtime_Block_Range'] = df['Runtime_Block'].apply(lambda x: f"{x}-{x+29}")
 
 # Add a column for the difference between tmdb_revenue and tmdb_budget
 df['Revenue_Budget_Diff'] = df['tmdb_revenue'] - df['tmdb_budget']
@@ -93,16 +103,16 @@ def get_top_star1():
 # Get runtime blocks
 def get_runtime_blocks():
     # Get unique runtime blocks
-    unique_runtime_blocks = df['Runtime_Block'].dropna().unique().tolist()
+    unique_runtime_blocks = df['Runtime_Block_Range'].dropna().unique().tolist()
     # Convert runtime blocks to strings
-    unique_runtime_blocks = [str(int(block)) for block in unique_runtime_blocks]
+    #unique_runtime_blocks = [str(int(block)) for block in unique_runtime_blocks]
     return unique_runtime_blocks
 
 if __name__ == "__main__":
     # Example usage
     query = 'Action 1980 120 Steven Spielberg Tom Hanks'
     recommendations = get_content_recs(query)
-    print(recommendations[['Series_Title', 'Genre', 'Released_Year', 'Runtime_Block', 'IMDB_Rating', 'Director', 'Star1']])
+    print(recommendations[['Series_Title', 'Genre', 'Released_Year', 'Runtime', 'Runtime_Block_Range', 'IMDB_Rating', 'Director', 'Star1']])
     print(get_genres())
     print(get_decades())   
     print(get_top_directors())

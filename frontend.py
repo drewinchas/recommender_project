@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from backend import get_content_recs, get_genres, get_decades, get_top_directors, get_top_star1
+from backend import get_content_recs, get_genres, get_decades, get_top_directors, get_top_star1, get_runtime_blocks
 from collab import get_collab_recs
 
 # Set the title of the app
@@ -38,7 +38,7 @@ if st.session_state.screen == 'query':
         decade = st.selectbox('Select Decade', options=[''] + get_decades())
         director = st.selectbox('Select Director', options=[''] + get_top_directors())
         star = st.selectbox('Select Star', options=[''] + get_top_star1())
-        runtime = st.selectbox('Select Runtime Block', options=[''] + get_runtime_blocks())
+        runtime = st.selectbox('Select Runtime Range', options=[''] + get_runtime_blocks())
         
         # Submit button
         submit_button = st.form_submit_button(label='Get Recommendations')
@@ -61,8 +61,11 @@ if st.session_state.screen == 'query':
             'IMDB_Rating': 'IMDB Rating',
         })
 
-       # Convert Year to string without decimal points or commas
+        # Convert Year to string without decimal points or commas
         recommendations['Year'] = recommendations['Year'].astype(int).astype(str)
+
+        # Convert Runtime to string ending in " min"
+        recommendations['Runtime'] = recommendations['Runtime'].astype(int).astype(str) + " min"
         
         # Store recommendations in session state
         st.session_state.recommendations = recommendations
@@ -76,7 +79,7 @@ if st.session_state.screen == 'recommendations':
 
     with st.container(border=True):
         # Display column headers
-        col1, col2, col3, col4, col5, col6 = st.columns([3, 2, 1, 1, 2, 2])
+        col1, col2, col3, col4, col5, col6, col7 = st.columns([3,2,1,2,2,2,2])
         with col1:
             st.write("Title")
         with col2:
@@ -84,10 +87,12 @@ if st.session_state.screen == 'recommendations':
         with col3:
             st.write("Year")
         with col4:
-            st.write("IMDB Rating")
+            st.write("Runtime")
         with col5:
-            st.write("Director")
+            st.write("IMDB Rating")
         with col6:
+            st.write("Director")
+        with col7:
             st.write("Starring Actor")
     
         # Display recommendations with clickable buttons
@@ -95,20 +100,23 @@ if st.session_state.screen == 'recommendations':
         if not recommendations.empty:
         
             for index, row in recommendations.iterrows():
-                col1, col2, col3, col4, col5, col6 = st.columns([3,2,1,1,2,2])
+                col1, col2, col3, col4, col5, col6, col7 = st.columns([3,2,1,2,2,2,2])
                 with col1:
                     #st.write(row['Title'])
                     if st.button(row['Title'], key=index):
+                        st.session_state['favorite_movie'] = row['Title']
                         show_collab_recommendations(row['Title'])
                 with col2:
                     st.write(row['Genre'])
                 with col3:
                     st.write(row['Year'])
                 with col4:
-                    st.write(row['IMDB Rating'])
+                    st.write(row['Runtime'])
                 with col5:
-                    st.write(row['Director'])
+                    st.write(row['IMDB Rating'])
                 with col6:
+                    st.write(row['Director'])
+                with col7:
                     st.write(row['Star1'])
         else:
             st.write("No recommendations found for the given criteria.")
@@ -116,14 +124,15 @@ if st.session_state.screen == 'recommendations':
     # Button to go back to query screen
     if st.button('Back to Query'):
         st.session_state.screen = 'query'
+        st.rerun()
     
-    # Collaborative recommendations screen
+# Collaborative recommendations screen
 if st.session_state.screen == 'collab_recommendations':
-    st.write("Here are movies similar to your selected favorite:")
+    st.write("Here are movies similar to your selected favorite: " + st.session_state.favorite_movie)
     
     with st.container(border=True):
         # Display column headers
-        col1, col2, col3, col4, col5, col6 = st.columns([3, 2, 1, 1, 2, 2])
+        col1, col2, col3, col4, col5, col6, col7 = st.columns([3,2,1,2,2,2,2])
         with col1:
             st.write("Title")
         with col2:
@@ -131,17 +140,19 @@ if st.session_state.screen == 'collab_recommendations':
         with col3:
             st.write("Year")
         with col4:
-            st.write("IMDB Rating")
+            st.write("Runtime")
         with col5:
-            st.write("Director")
+            st.write("IMDB Rating")
         with col6:
+            st.write("Director")
+        with col7:
             st.write("Starring Actor")
 
         # Display collaborative recommendations
         collab_recommendations = st.session_state.collab_recommendations
         if not collab_recommendations.empty:
             for index, row in collab_recommendations.iterrows():
-                col1, col2, col3, col4, col5, col6 = st.columns([3,2,1,1,2,2])
+                col1, col2, col3, col4, col5, col6, col7 = st.columns([3,2,1,2,2,2,2])
                 with col1:
                     st.write(row['Title'])
                 with col2:
@@ -149,10 +160,12 @@ if st.session_state.screen == 'collab_recommendations':
                 with col3:
                     st.write(row['Year'])
                 with col4:
-                    st.write(row['IMDB Rating'])
+                    st.write(row['Runtime'])
                 with col5:
-                    st.write(row['Director'])
+                    st.write(row['IMDB Rating'])
                 with col6:
+                    st.write(row['Director'])
+                with col7:
                     st.write(row['Star1'])
         else:
             st.write("No similar movies found.")
