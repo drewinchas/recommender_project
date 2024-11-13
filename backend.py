@@ -12,28 +12,28 @@ df_expanded = df.assign(Genre=df['Genre'].str.split(',')).explode('Genre')
 df_expanded['Genre'] = df_expanded['Genre'].str.strip()
 
 # Add a column for the decade of the year the movie was released
-df_expanded['Decade'] = (df_expanded['Released_Year'] // 10) * 10
+df['Decade'] = (df['Released_Year'] // 10) * 10
 
 # Add a column for the runtime in blocks of 30 minutes
-df_expanded['Runtime_Block'] = (df_expanded['tmdb_runtime'] // 30) * 30
+df['Runtime_Block'] = (df['tmdb_runtime'] // 30) * 30
 
 # Add a column for the difference between tmdb_revenue and tmdb_budget
-df_expanded['Revenue_Budget_Diff'] = df_expanded['tmdb_revenue'] - df_expanded['tmdb_budget']
+df['Revenue_Budget_Diff'] = df['tmdb_revenue'] - df['tmdb_budget']
 
 # Combine relevant features into a single string for each movie
-df_expanded['Features'] = (
-    df_expanded['Genre'] + ' ' +
-    df_expanded['Decade'].astype(str) + ' ' +
-    df_expanded['Runtime_Block'].astype(str) + ' ' +
-    df_expanded['Director'] + ' ' +
-    df_expanded['Star1']
+df['Features'] = (
+    df['Genre'] + ' ' +
+    df['Decade'].astype(str) + ' ' +
+    df['Runtime_Block'].astype(str) + ' ' +
+    df['Director'] + ' ' +
+    df['Star1']
 )
 
 # Create a TF-IDF Vectorizer
 tfidf_vectorizer = TfidfVectorizer(stop_words='english')
 
 # Fit and transform the Features column
-tfidf_matrix = tfidf_vectorizer.fit_transform(df_expanded['Features'])
+tfidf_matrix = tfidf_vectorizer.fit_transform(df['Features'])
 
 # Compute the cosine similarity matrix
 cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
@@ -59,28 +59,7 @@ def get_content_recs(query, cosine_sim=cosine_sim):
     top_indices = sim_scores.argsort()[-10:][::-1]
     
     # Return the top 10 most similar movies
-    return df_expanded.iloc[top_indices]
-
-# Function to get collaborative recommendations based on a single Series_Title
-def get_collab_recs(series_title, cosine_sim=cosine_sim2):
-    # Find the index of the movie that matches the series_title
-    idx = df[df['Series_Title'] == series_title].index[0]
-    
-    # Get the pairwise similarity scores of all movies with that movie
-    similarities = list(enumerate(cosine_sim[idx]))
-    print(similarities)
-    
-    # Sort the movies based on the similarity scores
-    similarities = sorted(similarities, key=lambda x: x[1], reverse=True)
-    
-    # Get the scores of the 10 most similar movies
-    similarities = similarities[1:11]
-    
-    # Get the movie indices
-    movie_indices = [i[0] for i in similarities]
-    
-    # Return the top 10 most similar movies
-    return df.iloc[movie_indices]
+    return df.iloc[top_indices]
 
 # Return all genres
 def get_genres():
@@ -90,7 +69,7 @@ def get_genres():
 # Return all decades
 def get_decades():
     # Filter out non-numeric values and get unique decades
-    unique_decades = df_expanded['Decade'].dropna().unique().tolist()
+    unique_decades = df['Decade'].dropna().unique().tolist()
     # Convert decades to strings
     unique_decades = [str(int(decade)) for decade in unique_decades]
     return unique_decades
@@ -98,7 +77,7 @@ def get_decades():
 # Return top 10 directors
 def get_top_directors():
     # Count the number of movies for each director
-    director_counts = df_expanded['Director'].value_counts()
+    director_counts = df['Director'].value_counts()
     # Get the top ten directors
     top_directors = director_counts.head(10).index.tolist()
     return top_directors
@@ -106,7 +85,7 @@ def get_top_directors():
 # Return top 10 stars in Star1
 def get_top_star1():
     # Count the number of movies for each star in Star1
-    star1_counts = df_expanded['Star1'].value_counts()
+    star1_counts = df['Star1'].value_counts()
     # Get the top ten stars
     top_star1 = star1_counts.head(10).index.tolist()
     return top_star1
@@ -122,5 +101,5 @@ if __name__ == "__main__":
     print(get_top_star1())
 
     # Example usage of collaborative recommendations
-    collab_recommendations = get_collab_recs('The Shawshank Redemption')
-    print(collab_recommendations[['Series_Title', 'Genre', 'Released_Year', 'IMDB_Rating', 'Director', 'Star1']])
+    #collab_recommendations = get_collab_recs('The Shawshank Redemption')
+    #print(collab_recommendations[['Series_Title', 'Genre', 'Released_Year', 'IMDB_Rating', 'Director', 'Star1']])

@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from backend import get_content_recs, get_genres, get_decades, get_top_directors, get_top_star1
+from collab import get_collab_recs
 
 # Set the title of the app
 st.title("Drew's Movie Recommender")
@@ -12,6 +13,21 @@ if 'screen' not in st.session_state:
 # Function to switch to recommendations screen
 def show_recommendations():
     st.session_state.screen = 'recommendations'
+    st.rerun()
+
+# Function to switch to collaborative recommendations screen
+def show_collab_recommendations(movie_title):
+    st.session_state.screen = 'collab_recommendations'
+    st.session_state.collab_recommendations = get_collab_recs(movie_title).copy()
+    st.session_state.collab_recommendations.rename(columns={
+            'Released_Year': 'Year',
+            'Series_Title': 'Title',
+            'IMDB_Rating': 'IMDB Rating',
+        }, inplace=True)
+    
+    # Convert Year to string without decimal points or commas
+    st.session_state.collab_recommendations['Year'] = st.session_state.collab_recommendations['Year'].astype(int).astype(str)
+
     st.rerun()
 
 # Query screen
@@ -56,14 +72,91 @@ if st.session_state.screen == 'query':
 # Recommendations screen
 if st.session_state.screen == 'recommendations':
     st.write("Pick your favorite movie from this list, for a more personalized recommendation.")
+
+    with st.container(border=True):
+        # Display column headers
+        col1, col2, col3, col4, col5, col6 = st.columns([3, 2, 1, 1, 2, 2])
+        with col1:
+            st.write("Title")
+        with col2:
+            st.write("Genre")
+        with col3:
+            st.write("Year")
+        with col4:
+            st.write("IMDB Rating")
+        with col5:
+            st.write("Director")
+        with col6:
+            st.write("Starring Actor")
     
-    # Display recommendations
-    recommendations = st.session_state.recommendations
-    if not recommendations.empty:
-        st.dataframe(recommendations[['Title', 'Genre', 'Year', 'IMDB Rating', 'Director', 'Star1']])
-    else:
-        st.write("No recommendations found for the given criteria.")
+        # Display recommendations with clickable buttons
+        recommendations = st.session_state.recommendations
+        if not recommendations.empty:
+        
+            for index, row in recommendations.iterrows():
+                col1, col2, col3, col4, col5, col6 = st.columns([3,2,1,1,2,2])
+                with col1:
+                    #st.write(row['Title'])
+                    if st.button(row['Title'], key=index):
+                        show_collab_recommendations(row['Title'])
+                with col2:
+                    st.write(row['Genre'])
+                with col3:
+                    st.write(row['Year'])
+                with col4:
+                    st.write(row['IMDB Rating'])
+                with col5:
+                    st.write(row['Director'])
+                with col6:
+                    st.write(row['Star1'])
+        else:
+            st.write("No recommendations found for the given criteria.")
     
     # Button to go back to query screen
     if st.button('Back to Query'):
         st.session_state.screen = 'query'
+    
+    # Collaborative recommendations screen
+if st.session_state.screen == 'collab_recommendations':
+    st.write("Here are movies similar to your selected favorite:")
+    
+    with st.container(border=True):
+        # Display column headers
+        col1, col2, col3, col4, col5, col6 = st.columns([3, 2, 1, 1, 2, 2])
+        with col1:
+            st.write("Title")
+        with col2:
+            st.write("Genre")
+        with col3:
+            st.write("Year")
+        with col4:
+            st.write("IMDB Rating")
+        with col5:
+            st.write("Director")
+        with col6:
+            st.write("Starring Actor")
+
+        # Display collaborative recommendations
+        collab_recommendations = st.session_state.collab_recommendations
+        if not collab_recommendations.empty:
+            for index, row in collab_recommendations.iterrows():
+                col1, col2, col3, col4, col5, col6 = st.columns([3,2,1,1,2,2])
+                with col1:
+                    st.write(row['Title'])
+                with col2:
+                    st.write(row['Genre'])
+                with col3:
+                    st.write(row['Year'])
+                with col4:
+                    st.write(row['IMDB Rating'])
+                with col5:
+                    st.write(row['Director'])
+                with col6:
+                    st.write(row['Star1'])
+        else:
+            st.write("No similar movies found.")
+    
+    # Button to go back to query screen
+    if st.button('Back to Query'):
+        st.session_state.screen = 'query'
+        st.rerun()
