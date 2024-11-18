@@ -39,6 +39,21 @@ df['Features'] = (
     df['Star1']
 )
 
+df['Features2'] = (
+    df['Series_Title'].fillna('') + ' ' +
+    df['Released_Year'].fillna('').astype(str) + ' ' +
+    df['Certificate'].fillna('') + ' ' +
+    df['Runtime'].fillna('').astype(str) + ' ' +
+    df['Genre'].fillna('') + ' ' +
+    df['IMDB_Rating'].fillna('').astype(str) + ' ' +
+    df['Overview'].fillna('') + ' ' +
+    df['Meta_score'].fillna('').astype(str) + ' ' +
+    df['Director'].fillna('') + ' ' +
+    df['Star1'].fillna('') + ' ' +
+    df['No_of_Votes'].fillna('').astype(str) + ' ' +
+    df['Gross'].fillna('').astype(str)
+)
+
 # Create a TF-IDF Vectorizer
 tfidf_vectorizer = TfidfVectorizer(stop_words='english')
 
@@ -52,7 +67,7 @@ cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 tfidf_vectorizer2 = TfidfVectorizer(stop_words='english')
 
 # Fit and transform the Features column
-tfidf_matrix2 = tfidf_vectorizer2.fit_transform(df)
+tfidf_matrix2 = tfidf_vectorizer2.fit_transform(df['Features2'])
 
 # Compute the cosine similarity matrix
 cosine_sim2 = cosine_similarity(tfidf_matrix2, tfidf_matrix2)
@@ -64,6 +79,20 @@ def get_content_recs(query, cosine_sim=cosine_sim):
     
     # Compute the cosine similarity between the query and all movies
     sim_scores = cosine_similarity(query_vec, tfidf_matrix).flatten()
+    
+    # Get the indices of the top 10 most similar movies
+    top_indices = sim_scores.argsort()[-10:][::-1]
+    
+    # Return the top 10 most similar movies
+    return df.iloc[top_indices]
+
+# Function to get movie recommendations based on user query
+def get_content_recs_free(query, cosine_sim=cosine_sim2):
+    # Transform the query using the TF-IDF Vectorizer
+    query_vec = tfidf_vectorizer2.transform([query])
+    
+    # Compute the cosine similarity between the query and all movies
+    sim_scores = cosine_similarity(query_vec, tfidf_matrix2).flatten()
     
     # Get the indices of the top 10 most similar movies
     top_indices = sim_scores.argsort()[-10:][::-1]
@@ -105,13 +134,16 @@ def get_runtime_blocks():
     # Get unique runtime blocks
     unique_runtime_blocks = df['Runtime_Block_Range'].dropna().unique().tolist()
     # Convert runtime blocks to strings
-    #unique_runtime_blocks = [str(int(block)) for block in unique_runtime_blocks]
     return unique_runtime_blocks
 
 if __name__ == "__main__":
     # Example usage
-    query = 'Action 1980 120 Steven Spielberg Tom Hanks'
+    query = '1990'
     recommendations = get_content_recs(query)
+    print(query)
+    print(recommendations[['Series_Title', 'Genre', 'Released_Year', 'Runtime', 'Runtime_Block_Range', 'IMDB_Rating', 'Director', 'Star1']])
+    recommendations = get_content_recs_free(query)
+    print(query)
     print(recommendations[['Series_Title', 'Genre', 'Released_Year', 'Runtime', 'Runtime_Block_Range', 'IMDB_Rating', 'Director', 'Star1']])
     print(get_genres())
     print(get_decades())   
@@ -119,6 +151,4 @@ if __name__ == "__main__":
     print(get_top_star1())
     print(get_runtime_blocks())
 
-    # Example usage of collaborative recommendations
-    #collab_recommendations = get_collab_recs('The Shawshank Redemption')
-    #print(collab_recommendations[['Series_Title', 'Genre', 'Released_Year', 'IMDB_Rating', 'Director', 'Star1']])
+ 

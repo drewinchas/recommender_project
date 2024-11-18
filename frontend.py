@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from backend import get_content_recs, get_genres, get_decades, get_top_directors, get_top_star1, get_runtime_blocks
+from backend import get_content_recs, get_genres, get_decades, get_top_directors, get_top_star1, get_runtime_blocks, get_content_recs_free
 from collab import get_collab_recs
 
 # Set the title of the app
@@ -40,6 +40,9 @@ if st.session_state.screen == 'query':
         director = st.selectbox('Select Director', options=[''] + get_top_directors())
         star = st.selectbox('Select Star', options=[''] + get_top_star1())
         runtime = st.selectbox('Select Runtime Range', options=[''] + get_runtime_blocks())
+
+        # Free-text input field
+        free_text = st.text_input('Enter free text for recommendations (printable characters only)', value='')
         
         # Submit button
         submit_button = st.form_submit_button(label='Get Recommendations')
@@ -49,9 +52,15 @@ if st.session_state.screen == 'query':
         # Create a query string based on user input
         query = ' '.join(filter(None, [genre, decade, runtime, director, star]))
         
-        # Get recommendations
-        recommendations = get_content_recs(query)
-        
+        # Check if free_text contains only printable characters
+        if free_text and all(char.isprintable() for char in free_text):
+            # Use free_text to query get_content_recs_free
+            recommendations = get_content_recs_free(free_text)
+        else:
+            # Get recommendations
+            recommendations = get_content_recs(query)
+       
+
         # Sort recommendations by IMDB rating
         recommendations = recommendations.sort_values(by='IMDB_Rating', ascending=False)
         
