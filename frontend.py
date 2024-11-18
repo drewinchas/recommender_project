@@ -42,7 +42,7 @@ if st.session_state.screen == 'query':
         runtime = st.selectbox('Select Runtime Range', options=[''] + get_runtime_blocks())
 
         # Free-text input field
-        free_text = st.text_input('Enter free text for recommendations (printable characters only)', value='')
+        free_text = st.text_input('''**OR**, Enter free text for recommendations (printable characters only)''', value='')
         
         # Submit button
         submit_button = st.form_submit_button(label='Get Recommendations')
