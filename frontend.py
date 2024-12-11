@@ -29,7 +29,7 @@ def show_collab_recommendations(movie_title):
     try:
         st.session_state.collab_recommendations['Year'] = st.session_state.collab_recommendations['Year'].astype(int).astype(str)
     except:
-        pass
+        st.session_state.collab_recommendations['Year'] = ""
 
     st.rerun()
 
