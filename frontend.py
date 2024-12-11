@@ -26,7 +26,8 @@ def show_collab_recommendations(movie_title):
         }, inplace=True)
     
     # Convert Year to string without decimal points or commas
-    st.session_state.collab_recommendations['Year'] = st.session_state.collab_recommendations['Year'].astype(int).astype(str)
+    try:
+        st.session_state.collab_recommendations['Year'] = st.session_state.collab_recommendations['Year'].astype(int).astype(str)
 
     st.rerun()
 
