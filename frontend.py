@@ -26,10 +26,12 @@ def show_collab_recommendations(movie_title):
         }, inplace=True)
     
     # Convert Year to string without decimal points or commas
-    try:
-        st.session_state.collab_recommendations['Year'] = st.session_state.collab_recommendations['Year'].astype(int).astype(str)
-    except:
-        st.session_state.collab_recommendations['Year'] = ""
+
+    st.session_state.collab_recommendations['Year'].fillna(0, inplace=True)
+    st.session_state.collab_recommendations['Year'] = st.session_state.collab_recommendations['Year'].astype(int).astype(str)
+    for i in range(len(st.session_state.collab_recommendations['Year'])):
+        if st.session_state.collab_recommendations['Year'].iloc[i] == '0':
+            st.session_state.collab_recommendations['Year'].iloc[i] = ""
 
     st.rerun()
 
@@ -75,7 +77,11 @@ if st.session_state.screen == 'query':
         })
 
         # Convert Year to string without decimal points or commas
+        recommendations['Year'].fillna(0, inplace=True)
         recommendations['Year'] = recommendations['Year'].astype(int).astype(str)
+        for i in range(len(recommendations['Year'])):
+            if recommendations['Year'].iloc[i] == '0':
+                recommendations['Year'].iloc[i] = ""
 
         # Convert Runtime to string ending in " min"
         recommendations['Runtime'] = recommendations['Runtime'].astype(int).astype(str) + " min"
